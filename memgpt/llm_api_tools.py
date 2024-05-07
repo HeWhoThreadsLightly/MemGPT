@@ -433,6 +433,25 @@ def create(
             data=data,
         )
 
+    # TODO move to model_backend
+    elif agent_state.llm_config.model_endpoint_type == "LLMglue":
+        if use_tool_naming:
+            data = dict(
+                model=agent_state.llm_config.model,
+                messages=messages,
+                tools=[{"type": "function", "function": f} for f in functions] if functions else None,
+                tool_choice=function_call,
+                user=str(agent_state.user_id),
+            )
+        else:
+            data = dict(
+                model=agent_state.llm_config.model,
+                messages=messages,
+                functions=functions,
+                function_call=function_call,
+                user=str(agent_state.user_id),
+            )
+        return GlueModel.prompt(data)
     # azure
     elif agent_state.llm_config.model_endpoint_type == "azure":
         azure_deployment = (
